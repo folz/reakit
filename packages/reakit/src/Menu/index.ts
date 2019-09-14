@@ -1,3 +1,4 @@
+// TODO Replace all the if (parent.horizontal) by some check to see if it's static Menu
 export * from "./Menu";
 export * from "./MenuArrow";
 export * from "./MenuBar";

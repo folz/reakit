@@ -1,7 +1,20 @@
+// Test horizontal menu popover
+// Test vertical menu bar
+// Test modal menu
+// Test more Menu (replace some MenuBar's)
+// REVERT EVERYTHING
+// MenuBar is the one that is always visible (horizontal or vertical)
+// Menu is always a Popover. It should composes MenuBar
+// So, I guess we should just rename StaticMenu to MenuBar and useMenuBar in Menu
+// That's different from Listbox. ListboxPopover is a reality.
+// We probably need a useMenuBarState (current useMenuState, without usePopoverState)
+// And a useMenuState, which will compose useMenuBarState together with usePopoverState
 import * as React from "react";
 import { render, fireEvent, act, wait } from "@testing-library/react";
+import { useMenuState } from "../__MenuState";
+import { StaticMenu as Menu } from "../__Menu";
 import {
-  useMenuState,
+  useMenuPopoverState,
   MenuPopover,
   MenuDisclosure,
   MenuItem,
@@ -16,19 +29,9 @@ function keyDown(key: string) {
   fireEvent.keyDown(document.activeElement!, { key });
 }
 
-// test("static menu is always visible", async () => {
-//   const Test = () => {
-//     const menu = useMenuState();
-//     return <MenuBar {...menu} aria-label="menu" />;
-//   };
-//   const { getByLabelText } = render(<Test />);
-//   const menu = getByLabelText("menu");
-//   await wait(expect(menu).toBeVisible);
-// });
-
-test("clicking on disclosure opens menu and focus the first menu item", async () => {
+test("clicking on disclosure opens menu popover and focus the first menu item", async () => {
   const Test = () => {
-    const menu = useMenuState();
+    const menu = useMenuPopoverState();
     return (
       <>
         <MenuDisclosure {...menu}>disclosure</MenuDisclosure>
@@ -50,9 +53,9 @@ test("clicking on disclosure opens menu and focus the first menu item", async ()
   expect(item1).toHaveFocus();
 });
 
-test("hovering menu item moves focus to it", async () => {
+test("hovering menu popover item moves focus to it", async () => {
   const Test = () => {
-    const menu = useMenuState({ visible: true });
+    const menu = useMenuPopoverState({ visible: true });
     return (
       <MenuPopover {...menu} aria-label="menu">
         <MenuItem {...menu}>item1</MenuItem>
@@ -72,10 +75,10 @@ test("hovering menu item moves focus to it", async () => {
   await wait(expect(item1).not.toHaveFocus);
 });
 
-test("hovering out expanded menu item disclosure does not moves focus", async () => {
+test("hovering out expanded menu item disclosure does not move focus", async () => {
   const Submenu = React.forwardRef(
     (props: MenuDisclosureHTMLProps, ref: React.RefObject<any>) => {
-      const menu = useMenuState();
+      const menu = useMenuPopoverState();
       return (
         <>
           <MenuDisclosure {...menu} {...props} ref={ref}>
@@ -122,7 +125,7 @@ test("hovering out expanded menu item disclosure does not moves focus", async ()
 test("clicking on menu item disclosure opens submenu without moving focus", async () => {
   const Submenu = React.forwardRef(
     (props: MenuDisclosureHTMLProps, ref: React.RefObject<any>) => {
-      const menu = useMenuState();
+      const menu = useMenuPopoverState();
       return (
         <>
           <MenuDisclosure {...menu} {...props} ref={ref}>
@@ -140,11 +143,11 @@ test("clicking on menu item disclosure opens submenu without moving focus", asyn
   const Test = () => {
     const menu = useMenuState();
     return (
-      <MenuBar {...menu} aria-label="menu">
+      <Menu {...menu} aria-label="menu">
         <MenuItem {...menu}>item1</MenuItem>
         <MenuItem {...menu} as={Submenu} />
         <MenuItem {...menu}>item3</MenuItem>
-      </MenuBar>
+      </Menu>
     );
   };
   const { getByText, getByLabelText } = render(<Test />);
@@ -156,10 +159,10 @@ test("clicking on menu item disclosure opens submenu without moving focus", asyn
   expect(subitem1).not.toHaveFocus();
 });
 
-test("focusing menu item disclosure does not open submenu", async () => {
+test("focusing menu item disclosure with keyboard does not open submenu", async () => {
   const Submenu = React.forwardRef(
     (props: MenuDisclosureHTMLProps, ref: React.RefObject<any>) => {
-      const menu = useMenuState();
+      const menu = useMenuPopoverState();
       return (
         <>
           <MenuDisclosure {...menu} {...props} ref={ref}>
@@ -177,11 +180,11 @@ test("focusing menu item disclosure does not open submenu", async () => {
   const Test = () => {
     const menu = useMenuState();
     return (
-      <MenuBar {...menu} aria-label="menu">
+      <Menu {...menu} aria-label="menu">
         <MenuItem {...menu}>item1</MenuItem>
         <MenuItem {...menu}>{props => <Submenu {...props} />}</MenuItem>
         <MenuItem {...menu}>item3</MenuItem>
-      </MenuBar>
+      </Menu>
     );
   };
   const { getByText, getByLabelText } = render(<Test />);
@@ -195,7 +198,7 @@ test("focusing menu item disclosure does not open submenu", async () => {
 test("pressing enter on menu item disclosure opens submenu and focus the first item", async () => {
   const Submenu = React.forwardRef(
     (props: MenuDisclosureHTMLProps, ref: React.RefObject<any>) => {
-      const menu = useMenuState();
+      const menu = useMenuPopoverState();
       return (
         <>
           <MenuDisclosure {...menu} {...props} ref={ref}>
@@ -213,11 +216,11 @@ test("pressing enter on menu item disclosure opens submenu and focus the first i
   const Test = () => {
     const menu = useMenuState();
     return (
-      <MenuBar {...menu} aria-label="menu">
+      <Menu {...menu} aria-label="menu">
         <MenuItem {...menu}>item1</MenuItem>
         <MenuItem {...menu}>{props => <Submenu {...props} />}</MenuItem>
         <MenuItem {...menu}>item3</MenuItem>
-      </MenuBar>
+      </Menu>
     );
   };
   const { getByText, getByLabelText } = render(<Test />);
@@ -235,7 +238,7 @@ test("pressing enter on menu item disclosure opens submenu and focus the first i
 test("pressing space on menu item disclosure opens submenu and focus the first item", async () => {
   const Submenu = React.forwardRef(
     (props: MenuDisclosureHTMLProps, ref: React.RefObject<any>) => {
-      const menu = useMenuState();
+      const menu = useMenuPopoverState();
       return (
         <>
           <MenuDisclosure {...menu} {...props} ref={ref}>
@@ -253,11 +256,11 @@ test("pressing space on menu item disclosure opens submenu and focus the first i
   const Test = () => {
     const menu = useMenuState();
     return (
-      <MenuBar {...menu} aria-label="menu">
+      <Menu {...menu} aria-label="menu">
         <MenuItem {...menu}>item1</MenuItem>
         <MenuItem {...menu}>{props => <Submenu {...props} />}</MenuItem>
         <MenuItem {...menu}>item3</MenuItem>
-      </MenuBar>
+      </Menu>
     );
   };
   const { getByText, getByLabelText } = render(<Test />);
@@ -275,7 +278,7 @@ test("pressing space on menu item disclosure opens submenu and focus the first i
 test("hovering menu item disclosure moves focus into it and opens submenu after a short delay without moving focus", async () => {
   const Submenu = React.forwardRef(
     (props: MenuDisclosureHTMLProps, ref: React.RefObject<any>) => {
-      const menu = useMenuState();
+      const menu = useMenuPopoverState();
       return (
         <>
           <MenuDisclosure {...menu} {...props} ref={ref}>
@@ -291,7 +294,7 @@ test("hovering menu item disclosure moves focus into it and opens submenu after 
     }
   );
   const Test = () => {
-    const menu = useMenuState();
+    const menu = useMenuPopoverState();
     return (
       <>
         <MenuDisclosure {...menu}>disclosure</MenuDisclosure>
@@ -323,7 +326,7 @@ test("hovering menu item disclosure moves focus into it and opens submenu after 
 
 test("arrow down on disclosure opens bottom menu and focus first item", async () => {
   const Cacete = () => {
-    const menu = useMenuState({ placement: "bottom-end" });
+    const menu = useMenuPopoverState({ placement: "bottom-end" });
     return (
       <>
         <MenuDisclosure {...menu}>disclosure</MenuDisclosure>
@@ -351,7 +354,7 @@ test("arrow down on disclosure opens bottom menu and focus first item", async ()
 
 test("arrow down on disclosure opens top menu and focus first item", async () => {
   const Test = () => {
-    const menu = useMenuState({ placement: "top" });
+    const menu = useMenuPopoverState({ placement: "top" });
     return (
       <>
         <MenuDisclosure {...menu}>disclosure</MenuDisclosure>
@@ -379,7 +382,7 @@ test("arrow down on disclosure opens top menu and focus first item", async () =>
 
 test("arrow up on disclosure opens bottom menu and focus last item", async () => {
   const Test = () => {
-    const menu = useMenuState({ placement: "bottom" });
+    const menu = useMenuPopoverState({ placement: "bottom" });
     return (
       <>
         <MenuDisclosure {...menu}>disclosure</MenuDisclosure>
@@ -407,7 +410,7 @@ test("arrow up on disclosure opens bottom menu and focus last item", async () =>
 
 test("arrow up on disclosure opens top menu and focus last item", async () => {
   const Test = () => {
-    const menu = useMenuState({ placement: "top-start" });
+    const menu = useMenuPopoverState({ placement: "top-start" });
     return (
       <>
         <MenuDisclosure {...menu}>disclosure</MenuDisclosure>
@@ -435,7 +438,7 @@ test("arrow up on disclosure opens top menu and focus last item", async () => {
 
 test("arrow right on disclosure opens right menu and focus first item", async () => {
   const Test = () => {
-    const menu = useMenuState({ placement: "right" });
+    const menu = useMenuPopoverState({ placement: "right" });
     return (
       <>
         <MenuDisclosure {...menu}>disclosure</MenuDisclosure>
@@ -463,7 +466,7 @@ test("arrow right on disclosure opens right menu and focus first item", async ()
 
 test("arrow left on disclosure opens left menu and focus first item", async () => {
   const Test = () => {
-    const menu = useMenuState({ placement: "left" });
+    const menu = useMenuPopoverState({ placement: "left" });
     return (
       <>
         <MenuDisclosure {...menu}>disclosure</MenuDisclosure>
@@ -492,7 +495,7 @@ test("arrow left on disclosure opens left menu and focus first item", async () =
 test("arrow right on menu item disclosure opens right submenu and focus first item", async () => {
   const Submenu = React.forwardRef(
     (props: MenuDisclosureHTMLProps, ref: React.RefObject<any>) => {
-      const menu = useMenuState();
+      const menu = useMenuPopoverState();
       return (
         <>
           <MenuDisclosure {...menu} {...props} ref={ref}>
@@ -508,7 +511,7 @@ test("arrow right on menu item disclosure opens right submenu and focus first it
     }
   );
   const Test = () => {
-    const menu = useMenuState();
+    const menu = useMenuPopoverState();
     return (
       <>
         <MenuDisclosure {...menu}>disclosure</MenuDisclosure>
@@ -545,7 +548,7 @@ test("arrow right on menu item disclosure opens right submenu and focus first it
 test("arrow left on menu item disclosure opens left submenu and focus first item", async () => {
   const Submenu = React.forwardRef(
     (props: MenuDisclosureHTMLProps, ref: React.RefObject<any>) => {
-      const menu = useMenuState({ placement: "left" });
+      const menu = useMenuPopoverState({ placement: "left" });
       return (
         <>
           <MenuDisclosure {...menu} {...props} ref={ref}>
@@ -561,7 +564,7 @@ test("arrow left on menu item disclosure opens left submenu and focus first item
     }
   );
   const Test = () => {
-    const menu = useMenuState();
+    const menu = useMenuPopoverState();
     return (
       <MenuBar {...menu} aria-label="menu">
         <MenuItem {...menu}>item1</MenuItem>
@@ -593,7 +596,7 @@ test("arrow left on menu item disclosure opens left submenu and focus first item
 
 test("arrow up on menu focus last item", async () => {
   const Test = () => {
-    const menu = useMenuState({ visible: true });
+    const menu = useMenuPopoverState({ visible: true });
     return (
       <MenuPopover {...menu} aria-label="menu">
         <MenuItem {...menu}>item1</MenuItem>
@@ -617,7 +620,7 @@ test("arrow up on menu focus last item", async () => {
 
 test("arrow down on menu focus first item", async () => {
   const Test = () => {
-    const menu = useMenuState({ visible: true });
+    const menu = useMenuPopoverState({ visible: true });
     return (
       <MenuPopover {...menu} aria-label="menu">
         <MenuItem {...menu}>item1</MenuItem>
@@ -642,7 +645,7 @@ test("arrow down on menu focus first item", async () => {
 test("focusing menubar item disclosure opens the submenu without moving focus", async () => {
   const Submenu = React.forwardRef(
     (props: MenuDisclosureHTMLProps, ref: React.RefObject<any>) => {
-      const menu = useMenuState();
+      const menu = useMenuPopoverState();
       return (
         <>
           <MenuDisclosure {...menu} {...props} ref={ref}>
@@ -679,7 +682,7 @@ test("focusing menubar item disclosure opens the submenu without moving focus", 
 test("clicking on menubar item disclosure opens the submenu without moving focus", async () => {
   const Submenu = React.forwardRef(
     (props: MenuDisclosureHTMLProps, ref: React.RefObject<any>) => {
-      const menu = useMenuState();
+      const menu = useMenuPopoverState();
       return (
         <>
           <MenuDisclosure {...menu} {...props} ref={ref}>
@@ -717,7 +720,7 @@ test("clicking on menubar item disclosure opens the submenu without moving focus
 test("hovering menubar item disclosure does not move focus into it", async () => {
   const Submenu = React.forwardRef(
     (props: MenuDisclosureHTMLProps, ref: React.RefObject<any>) => {
-      const menu = useMenuState();
+      const menu = useMenuPopoverState();
       return (
         <>
           <MenuDisclosure {...menu} {...props} ref={ref}>
@@ -756,7 +759,7 @@ test("hovering menubar item disclosure moves focus into it if there is another s
       { index, ...props }: { index: number } & MenuDisclosureHTMLProps,
       ref: React.RefObject<any>
     ) => {
-      const menu = useMenuState();
+      const menu = useMenuPopoverState();
       return (
         <>
           <MenuDisclosure {...menu} {...props} ref={ref}>
@@ -801,7 +804,7 @@ test("hovering menubar item disclosure moves focus into it if there is another s
 test("pressing enter on menubar item disclosure focus submenu first item", async () => {
   const Submenu = React.forwardRef(
     (props: MenuDisclosureHTMLProps, ref: React.RefObject<any>) => {
-      const menu = useMenuState();
+      const menu = useMenuPopoverState();
       return (
         <>
           <MenuDisclosure {...menu} {...props} ref={ref}>
@@ -845,7 +848,7 @@ test("pressing enter on menubar item disclosure focus submenu first item", async
 test("pressing space on menubar item disclosure focus submenu first item", async () => {
   const Submenu = React.forwardRef(
     (props: MenuDisclosureHTMLProps, ref: React.RefObject<any>) => {
-      const menu = useMenuState();
+      const menu = useMenuPopoverState();
       return (
         <>
           <MenuDisclosure {...menu} {...props} ref={ref}>
@@ -890,7 +893,7 @@ test("move focus within menu with arrow keys", async () => {
   const Test = () => {
     const menu = useMenuState();
     return (
-      <MenuBar {...menu} aria-label="menu">
+      <Menu {...menu} aria-label="menu">
         <MenuItem {...menu}>item1</MenuItem>
         <MenuItem {...menu}>item2</MenuItem>
         <MenuItem {...menu}>item3</MenuItem>
@@ -905,7 +908,7 @@ test("move focus within menu with arrow keys", async () => {
             orange
           </MenuItemRadio>
         </MenuGroup>
-      </MenuBar>
+      </Menu>
     );
   };
   const { getByText } = render(<Test />);
@@ -935,7 +938,7 @@ test("move focus within menu with arrow keys", async () => {
 test("move focus within submenu with arrow keys", async () => {
   const Submenu = React.forwardRef(
     (props: MenuDisclosureHTMLProps, ref: React.RefObject<any>) => {
-      const menu = useMenuState();
+      const menu = useMenuPopoverState();
       return (
         <>
           <MenuDisclosure {...menu} {...props} ref={ref}>
@@ -951,7 +954,7 @@ test("move focus within submenu with arrow keys", async () => {
     }
   );
   const Test = () => {
-    const menu = useMenuState();
+    const menu = useMenuPopoverState();
     return (
       <>
         <MenuDisclosure {...menu}>disclosure</MenuDisclosure>
@@ -1000,7 +1003,7 @@ test("move focus within submenu with arrow keys", async () => {
 
 test("move focus within menu with ascii keys", async () => {
   const Test = () => {
-    const menu = useMenuState({ visible: true });
+    const menu = useMenuPopoverState({ visible: true });
     return (
       <MenuPopover {...menu} aria-label="menu">
         <MenuItem {...menu}>Abc</MenuItem>
@@ -1041,8 +1044,8 @@ test("move focus within menu with ascii keys", async () => {
 
 test("move focus within submenu with ascii keys", async () => {
   const Test = () => {
-    const menu1 = useMenuState({ visible: true });
-    const menu2 = useMenuState({ visible: true });
+    const menu1 = useMenuPopoverState({ visible: true });
+    const menu2 = useMenuPopoverState({ visible: true });
     return (
       <MenuPopover aria-label="menu1" {...menu1}>
         <MenuItem {...menu1}>Abc</MenuItem>
@@ -1128,7 +1131,7 @@ test("arrow right/left in a submenu moves focus between disclosures in menubar",
       { index, ...props }: { index: number } & MenuDisclosureHTMLProps,
       ref: React.RefObject<any>
     ) => {
-      const menu = useMenuState();
+      const menu = useMenuPopoverState();
       return (
         <>
           <MenuDisclosure {...menu} {...props} ref={ref}>
@@ -1200,7 +1203,7 @@ test("arrow right/left in a sub-submenu moves focus between disclosures in menub
       { index, ...props }: { index: number } & MenuDisclosureHTMLProps,
       ref: React.RefObject<any>
     ) => {
-      const menu = useMenuState();
+      const menu = useMenuPopoverState();
       return (
         <>
           <MenuDisclosure {...menu} {...props} ref={ref}>
@@ -1283,7 +1286,7 @@ test("arrow right/left in a sub-submenu moves focus between disclosures in menub
 
 test("clicking on menu disclorure closes the menu", async () => {
   const Test = () => {
-    const menu = useMenuState({ visible: true });
+    const menu = useMenuPopoverState({ visible: true });
     return (
       <>
         <MenuDisclosure {...menu}>disclosure</MenuDisclosure>
@@ -1307,7 +1310,7 @@ test("clicking on menu disclorure closes the menu", async () => {
 test("clicking outside the menu closes it", async () => {
   const Submenu = React.forwardRef(
     (props: MenuDisclosureHTMLProps, ref: React.RefObject<any>) => {
-      const menu = useMenuState({ visible: true });
+      const menu = useMenuPopoverState({ visible: true });
       return (
         <>
           <MenuDisclosure {...menu} {...props} ref={ref}>
@@ -1323,7 +1326,7 @@ test("clicking outside the menu closes it", async () => {
     }
   );
   const Test = () => {
-    const menu = useMenuState({ visible: true });
+    const menu = useMenuPopoverState({ visible: true });
     return (
       <>
         <MenuDisclosure {...menu}>disclosure</MenuDisclosure>
@@ -1348,7 +1351,7 @@ test("clicking outside the menu closes it", async () => {
 test("focusing outside the menu closes it", async () => {
   const Submenu = React.forwardRef(
     (props: MenuDisclosureHTMLProps, ref: React.RefObject<any>) => {
-      const menu = useMenuState({ visible: true });
+      const menu = useMenuPopoverState({ visible: true });
       return (
         <>
           <MenuDisclosure {...menu} {...props} ref={ref}>
@@ -1364,7 +1367,7 @@ test("focusing outside the menu closes it", async () => {
     }
   );
   const Test = () => {
-    const menu = useMenuState({ visible: true });
+    const menu = useMenuPopoverState({ visible: true });
     return (
       <>
         <button>button</button>
@@ -1392,7 +1395,7 @@ test("focusing outside the menu closes it", async () => {
 test("focusing outside the submenu closes it", async () => {
   const Submenu = React.forwardRef(
     (props: MenuDisclosureHTMLProps, ref: React.RefObject<any>) => {
-      const menu = useMenuState({ visible: true });
+      const menu = useMenuPopoverState({ visible: true });
       return (
         <>
           <MenuDisclosure {...menu} {...props} ref={ref}>
@@ -1408,7 +1411,7 @@ test("focusing outside the submenu closes it", async () => {
     }
   );
   const Test = () => {
-    const menu = useMenuState({ visible: true });
+    const menu = useMenuPopoverState({ visible: true });
     return (
       <>
         <MenuDisclosure {...menu}>disclosure</MenuDisclosure>
@@ -1434,7 +1437,7 @@ test("focusing outside the submenu closes it", async () => {
 test("pressing esc closes all menus", async () => {
   const Submenu = React.forwardRef(
     (props: MenuDisclosureHTMLProps, ref: React.RefObject<any>) => {
-      const menu = useMenuState({ visible: true });
+      const menu = useMenuPopoverState({ visible: true });
       return (
         <>
           <MenuDisclosure {...menu} {...props} ref={ref}>
@@ -1450,7 +1453,7 @@ test("pressing esc closes all menus", async () => {
     }
   );
   const Test = () => {
-    const menu = useMenuState({ visible: true });
+    const menu = useMenuPopoverState({ visible: true });
     return (
       <>
         <MenuDisclosure {...menu}>disclosure</MenuDisclosure>
@@ -1478,7 +1481,7 @@ test("pressing esc closes all menus", async () => {
 
 test("pressing esc on disclosure closes the menu", async () => {
   const Test = () => {
-    const menu = useMenuState({ visible: true });
+    const menu = useMenuPopoverState({ visible: true });
     return (
       <>
         <MenuDisclosure {...menu}>disclosure</MenuDisclosure>
